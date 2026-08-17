@@ -1,9 +1,9 @@
 import subprocess
 
-from dotenv import load_dotenv
 import streamlit as st
-from langchain_openai import ChatOpenAI
+from dotenv import load_dotenv
 from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 
 
 def pull_model(model_name: str) -> tuple[bool, str]:
@@ -50,10 +50,12 @@ st.set_page_config(
 )
 
 st.title("🍕 Chef-Bot 🍕")
-st.text("""\
+st.text(
+    """\
 I can help you plan your weekly meals. \
 If you have any ingredients that you want to use, please let me know and we can plan accordingly!"
-""")
+"""
+)
 # give option to choose from Ollama or OpenAI models
 option = st.selectbox(
     "Choose your LLM provider",
@@ -61,16 +63,10 @@ option = st.selectbox(
 )
 
 # choose a model from the chosen provider
-if option == "OpenAI": 
-    model = st.selectbox(
-        "Choose the model from OpenAI",
-        ["gpt-5.4-mini"]
-    )
+if option == "OpenAI":
+    model = st.selectbox("Choose the model from OpenAI", ["gpt-5.4-mini"])
 else:
-    model = st.selectbox(
-        "Choose the model from Ollama",
-       st.session_state.ollama_models
-    )
+    model = st.selectbox("Choose the model from Ollama", st.session_state.ollama_models)
 
 # initiate chat history
 if "chat_history" not in st.session_state:
@@ -90,8 +86,8 @@ if option == "OpenAI":
 
 else:
     llm = ChatOllama(
-            model=model,
-            temperature=0.7,  # add 70% creativity
+        model=model,
+        temperature=0.7,  # add 70% creativity
     )
 
 # input box
@@ -102,23 +98,23 @@ if user_prompt:
     st.session_state.chat_history.append({"role": "user", "content": user_prompt})
 
     response = llm.invoke(
-        input = [
+        input=[
             {
-                "role": "system", 
+                "role": "system",
                 "content": """\
                 You are a professional chef helping to give dinner ideas based on
-                the input provided. If the user shares some available ingredients, 
+                the input provided. If the user shares some available ingredients,
                 these should be used only once throughout the whole week.
-                
+
                 The output should be a link to a recipe that can be followed.
 
                 Give 1 to 3 options per day of the week.
 
-                If the question is not related to meal planning, simply reply 
+                If the question is not related to meal planning, simply reply
                 'I am a meal planner, please ask me about that instead.'.
-                """
-            }, 
-            *st.session_state.chat_history
+                """,
+            },
+            *st.session_state.chat_history,
         ]
     )
     assistant_response = response.content
